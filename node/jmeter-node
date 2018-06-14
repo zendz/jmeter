@@ -18,6 +18,10 @@ ZERO=0
 
 if [ ! -f ~/jmeter/conf/jmeter-options.conf ]; then
         echo "${HOME}/jmeter/conf/jmeter-options.conf not found!" && exit 0
+        mkdir -p ~/jmeter/{conf,log,run}
+        _HeapMem=`grep MemAvailable /proc/meminfo  | awk '{ print $2 }' | xargs -I {} echo "{}/1024" | bc`
+        _MetaSpaec=`echo "${_HeapMem}/2" | bc`
+        echo -e "HEAP=\"-Xms${_HeapMem}m -Xmx${_HeapMem}m -XX:MaxMetaspaceSize=${_MetaSpaec}m\"\n" | tee ~/jmeter/conf/jmeter-options.conf > /dev/null
 fi
 . ~/jmeter/conf/jmeter-options.conf
 
