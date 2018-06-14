@@ -1,0 +1,113 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:                 jmeter-server
+# Required-Start:           $java
+# Required-Stop:            $java
+# Short-Description:        Start and stop jmeter-server service.
+# Description:              -
+# Date-Creation:            -
+# Date-Last-Modification:   -
+# Author:                   -
+### END INIT INFO
+
+# Variables
+PGREP=`which pgrep`
+JAVA=`which java`
+ZERO=0
+
+if [ ! -f ~/jmeter/conf/jmeter-options.conf ]; then
+        echo "${HOME}/jmeter/conf/jmeter-options.conf not found!" && exit 0
+fi
+. ~/jmeter/conf/jmeter-options.conf
+
+# Start the jmeter-node
+start() {
+    echo "Starting jmeter-node..."
+    #Verify if the service is running
+    
+    $PGREP -f jmeter-server > /dev/null
+    VERIFIER=$?
+    if [ $ZERO = $VERIFIER ]
+    then
+        echo "The service is already running"
+    else
+        #Run the jar file MATH service
+        HEAP=$HEAP jmeter-server > /dev/null 2>&1 &
+        #sleep time before the service verification
+        sleep 10
+        #Verify if the service is running
+        $PGREP -f jmeter-server  > /dev/null
+        VERIFIER=$?
+        if [ $ZERO = $VERIFIER ]
+        then
+            echo "Service was successfully started"
+        else
+            echo "Failed to start service"
+        fi
+    fi
+    echo
+}
+
+# Stop the MATH
+stop() {
+    echo "Stopping jmeter-node..."
+    #Verify if the service is running
+    $PGREP -f jmeter-node > /dev/null
+    VERIFIER=$?
+    if [ $ZERO = $VERIFIER ]
+    then
+        #Kill the pid of java with the service name
+        kill -9 $($PGREP -f jmeter-server)
+        #Sleep time before the service verification
+        sleep 10
+        #Verify if the service is running
+        $PGREP -f jmeter-server  > /dev/null
+        VERIFIER=$?
+        if [ $ZERO = $VERIFIER ]
+        then
+            echo "Failed to stop service"
+        else
+            echo "Service was successfully stopped"
+        fi
+    else
+        echo "The service is already stopped"
+    fi
+    echo
+}
+
+# Verify the status of MATH
+status() {
+    echo "Checking status of jmeter-node..."
+    #Verify if the service is running
+    $PGREP -f jmeter-server > /dev/null
+    VERIFIER=$?
+    if [ $ZERO = $VERIFIER ]
+    then
+        echo "Service is running"
+    else
+        echo "Service is stopped"
+    fi
+    echo
+}
+
+# Main logic
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status
+        ;;
+    restart|reload)
+        stop
+        start
+        ;;
+  *)
+    echo $"Usage: $0 {start|stop|status|restart|reload}"
+    exit 1
+esac
+exit 0
